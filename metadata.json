@@ -1,0 +1,9 @@
+{
+  "name": "no nav bar  feature Orvantaa final",
+  "description": "Orvantaa is your friendly AI guide to knowledge. Ask questions, explore cool topics, and get simple answers. Learning just got fun! ✨",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "prompt": ""
+}
