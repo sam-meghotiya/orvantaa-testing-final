@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PlusIcon, SendIcon, CameraIcon, ImageIcon, MicIcon } from './icons/Icons.tsx';
+import { PlusIcon, SendIcon, CameraIcon, ImageIcon, MicIcon, GlobeIcon } from './icons/Icons.tsx';
 
 interface SearchBarProps {
   onSearch: (query: string, image?: string | null) => void;
@@ -14,6 +14,8 @@ interface SearchBarProps {
   startListening: () => void;
   stopListening: () => void;
   hasRecognitionSupport: boolean;
+  useWebSearch: boolean;
+  onWebSearchChange: (enabled: boolean) => void;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -29,6 +31,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   startListening,
   stopListening,
   hasRecognitionSupport,
+  useWebSearch,
+  onWebSearchChange,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -83,7 +87,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <div className="relative w-full max-w-lg lg:max-w-2xl">
       <form onSubmit={handleSubmit}>
-        <div className="relative flex items-center w-full bg-[#2C2C2E] rounded-3xl p-2 pr-1.5 transition-all duration-300 ease-in-out focus-within:ring-2 focus-within:ring-white/50">
+        <div className="relative flex items-center w-full bg-black rounded-3xl p-1.5 transition-all duration-300 ease-in-out focus-within:ring-2 focus-within:ring-white/50">
           <div className="relative" ref={menuRef}>
             <button 
                 type="button"
@@ -125,6 +129,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </div>
           
+          <button
+            type="button"
+            onClick={() => {
+                if (navigator.vibrate) navigator.vibrate(5);
+                onWebSearchChange(!useWebSearch);
+            }}
+            className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors ${useWebSearch ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+            aria-label="Toggle web search"
+            title="Toggle Web Search"
+            aria-pressed={useWebSearch}
+          >
+            <GlobeIcon />
+          </button>
+
           <input
             type="text"
             value={query}
@@ -150,7 +168,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <button
             type="submit"
             disabled={isLoading || (!query.trim() && !selectedImage)}
-            className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-[#00A9FF] text-white rounded-full disabled:bg-gray-700 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-800 text-white rounded-full disabled:bg-gray-600 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
             aria-label="Submit query"
           >
             <SendIcon />

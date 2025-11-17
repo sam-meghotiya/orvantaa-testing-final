@@ -10,35 +10,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        /* Orvantaa Dark Theme */
-        --bg-main: #1C1C1E;
-        --bg-secondary: #2C2C2E;
-        --bg-card-green: #D5E5D6;
-        --bg-card-green-darker: #293B3A;
-        --bg-card-blue: #D6E2E5;
-        --bg-card-blue-darker: #29323B;
+        /* New iOS-inspired Theme */
+        --bg-main: #000000;
+        --bg-secondary: #1C1C1E;
+        --bg-tertiary: #2C2C2E;
 
-        --accent-green: #B5E48C; /* Light green for buttons and highlights */
-        --accent-orange: #FFB74D;
-        --accent-pink: #F48FB1;
-        --accent-yellow: #FFF176;
+        --text-main: #FFFFFF;
+        --text-secondary: #EBEBF599; /* 60% opacity */
+        --text-muted: #EBEBF54D;   /* 30% opacity */
+        --text-dark: #000000;
 
-        --orb-gradient-from: #a855f7;
-        --orb-gradient-via: #ec4899;
-        --orb-gradient-to: #3b82f6;
+        --border-primary: rgba(112, 112, 112, 0.3);
+        --border-secondary: rgba(80, 80, 80, 0.5);
 
-        --text-main: #F5F5F7;
-        --text-secondary: #8E8E93;
-        --text-muted: #636366;
-        --text-dark: #1C1C1E;
+        --accent-blue: #0A84FF;
+        --accent-green: #30D158;
+        --accent-orange: #FF9F0A;
+        --accent-purple: #BF5AF2;
+        --accent-red: #FF453A;
+        --accent-yellow: #FFD60A;
 
-        --border-primary: rgba(255, 255, 255, 0.15);
-        --border-secondary: rgba(255, 255, 255, 0.1);
+        --accent-blue-soft: rgba(10, 132, 255, 0.2);
+        --accent-green-soft: rgba(48, 209, 88, 0.2);
+        --accent-orange-soft: rgba(255, 159, 10, 0.2);
+        --accent-purple-soft: rgba(191, 90, 242, 0.2);
+        
+        --orb-gradient-from: var(--accent-purple);
+        --orb-gradient-via: #5E5CE6; /* iOS Indigo */
+        --orb-gradient-to: var(--accent-blue);
 
-        --bg-popover: #2C2C2E;
+        --bg-popover: #1C1C1E;
         --border-popover: var(--border-primary);
 
-        --selection-bg: rgba(181, 228, 140, 0.3);
+        --selection-bg: rgba(10, 132, 255, 0.3);
 
         /* Prose Overrides */
         --tw-prose-body: var(--text-secondary);
@@ -65,7 +69,7 @@
       }
       
       .font-medium {
-        font-weight: 500 !important;
+        font-weight: 500 !importanit;
       }
       .font-semibold {
         font-weight: 600 !important;
@@ -78,34 +82,6 @@
       .no-scrollbar {
         -ms-overflow-style: none; /* IE and Edge */
         scrollbar-width: none; /* Firefox */
-      }
-      
-      /* Animation for the navbar glow */
-      @keyframes slow-pulse {
-        0%, 100% {
-            transform: translateX(-50%) scale(1);
-            opacity: 0.15;
-        }
-        50% {
-            transform: translateX(-50%) scale(1.2);
-            opacity: 0.25;
-        }
-      }
-      .animate-slow-pulse {
-        animation: slow-pulse 10s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-      }
-
-      /* Animation for the active nav item glow */
-      @keyframes pulse-shadow {
-        0%, 100% {
-          box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-        }
-        50% {
-          box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
-        }
-      }
-      .animate-pulse-shadow {
-        animation: pulse-shadow 4s infinite ease-in-out;
       }
 
       /* Set selection color */

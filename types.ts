@@ -6,9 +6,9 @@ import React from 'react';
 export interface Interaction {
   query: string;
   response: string;
-  followUpPrompts?: string[];
   isLoading?: boolean; // For streaming or loading state of a specific interaction
   image?: string | null;
+  sources?: { uri: string; title: string; }[];
 }
 
 export interface Conversation {
@@ -20,8 +20,7 @@ export interface Conversation {
   updatedAt: number;
 }
 
-// In the UI, a session is a wrapper for a conversation,
-// allowing for multiple conversations (tabs) to be managed.
+// Fix: Add ChatSession type definition to resolve compilation error in Header.tsx
 export interface ChatSession {
   id: string;
   conversation: Conversation;
@@ -54,6 +53,40 @@ export interface ExploreTopic {
   category: string;
   prompt: string;
 }
+
+// --- Dashboard Types ---
+export interface StudyAnalytics {
+    id: 'studyHours' | 'doubtsSolved' | 'topicsMastered' | 'learningStreak';
+    title: string;
+    value: string;
+    change: string;
+    changeType: 'up' | 'down';
+    icon: React.ReactNode;
+}
+
+export interface SubjectPerformance {
+    name: string;
+    progress: number; // 0-100
+    color: string;
+}
+
+export interface UpcomingTask {
+    title: string;
+    subject: string;
+    dueDate: string;
+}
+
+export interface Recommendation {
+    type: 'Revise' | 'Practice' | 'Explore';
+    title: string;
+    description: string;
+}
+
+export interface TrendingTopic {
+    query: string;
+    engagement: string;
+}
+
 
 export interface MarketInfo {
   name: string;

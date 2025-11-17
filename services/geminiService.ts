@@ -1,5 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
+
+import { GoogleGenAI, Type, GenerateContentParameters, GenerateContentResponse } from "@google/genai";
 import { Conversation, ExploreTopic, Interaction, MarketData } from '../types.ts';
+
+// --- Helper Functions ---
 
 function base64ToGenerativePart(base64: string) {
     const match = base64.match(/^data:(.+);base64,(.+)$/);
@@ -16,66 +19,105 @@ function base64ToGenerativePart(base64: string) {
     };
 }
 
-export const askOrvantaStream = async function* (prompt: string, imageBase64?: string | null): AsyncGenerator<string> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// --- "Pre-settled System": Centralized Instructions & API Wrappers ---
 
+/**
+ * This is the core "pre-settled" instruction that defines the Orvantaa persona.
+ * All general conversational chats will use this system instruction.
+ */
+const ORVANTAA_SYSTEM_INSTRUCTION = `You are Orvantaa, a friendly and concise study AI. Your goal is to provide clear, direct, and easy-to-understand answers.
+
+**CRITICAL STYLE RULE: You MUST follow these specific formatting rules in all your responses:**
+
+*   **Emoji Usage:** Enhance your answer by including one or two relevant and helpful emojis. For example, use a brain emoji 🧠 for a complex topic or a lightbulb emoji 💡 for a new idea. Choose emojis that genuinely add value and match the tone of the answer.
+*   **Symbol Usage:**
+    *   When providing an example or describing a diagram, use: 📊
+    *   When giving a reminder, use: 🔔
+    *   When listing key points, start each point with a bullet: •
+
+---
+
+**General Response Guidelines (Apply these to every response):**
+1.  **Be Direct:** Start with the most important information or a direct answer.
+2.  **Be Concise:** Explain concepts clearly but briefly. Use simple language.
+3.  **Use Structure:** Use bullet points or short numbered lists for key information.
+4.  **Emphasize Key Terms:** Use Markdown bolding (e.g., **word**) to highlight the most important concepts or keywords. Do this appropriately to add clarity.
+5.  **Stay Relevant:** Only provide information that directly answers the question.
+6.  **Concluding Question:** After fully answering the user's query, end your response with a single, relevant follow-up question to encourage further thought.`;
+
+/**
+ * Centralized wrapper for making non-streaming calls to the Gemini API.
+ * This handles client instantiation and re-throws errors for specific handling.
+ */
+async function callGemini(params: GenerateContentParameters): Promise<GenerateContentResponse> {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    return ai.models.generateContent(params);
+}
+
+// --- Public Service Functions ---
+
+export const askOrvantaStream = async function* (
+  prompt: string,
+  imageBase64: string | null | undefined,
+  useWebSearch: boolean
+): AsyncGenerator<{ text?: string; sources?: { uri: string; title: string }[] }> {
   if ((!prompt || prompt.trim() === '') && !imageBase64) {
     throw new Error("Prompt cannot be empty.");
   }
 
-  const model = 'gemini-2.5-flash';
-  
-  let contentsPayload: string | { parts: any[] };
+  let finalPrompt = prompt;
+  const config: any = {
+    systemInstruction: ORVANTAA_SYSTEM_INSTRUCTION,
+  };
 
-  if (imageBase64) {
-      const parts = [];
-      parts.push(base64ToGenerativePart(imageBase64));
-      if (prompt && prompt.trim() !== '') {
-          parts.push({ text: prompt });
-      }
-      contentsPayload = { parts };
+  if (useWebSearch) {
+    finalPrompt = `Using Google Search to gather information from a variety of trusted and reputable educational sources, synthesize a comprehensive and original answer for a student in India. Your answer must be aligned with the NCERT and CBSE curriculum. It is crucial that you do not directly quote or copy from your sources. Instead, provide the information in your own words. Question: "${prompt}"`;
+    config.tools = [{ googleSearch: {} }];
   } else {
-      contentsPayload = prompt;
+    // For standard queries, prioritize speed by disabling the thinking budget.
+    config.thinkingConfig = { thinkingBudget: 0 };
   }
 
+  let contentsPayload: string | { parts: any[] };
+  if (imageBase64) {
+    const parts = [];
+    parts.push(base64ToGenerativePart(imageBase64));
+    if (finalPrompt && finalPrompt.trim() !== '') {
+      parts.push({ text: finalPrompt });
+    }
+    contentsPayload = { parts };
+  } else {
+    contentsPayload = finalPrompt;
+  }
 
   try {
-    const response = await ai.models.generateContentStream({
-      model: model,
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const stream = await ai.models.generateContentStream({
+      model: 'gemini-2.5-flash',
       contents: contentsPayload,
-      config: {
-        systemInstruction: `You are a friendly and encouraging AI guide, like a cool mentor for students in India. Your main goal is to make complex topics simple and easy to remember, especially for exams.
-
-**Your Response Style:**
-- **Tone:** Super friendly, positive, and encouraging. Use simple, common words and short sentences. Use emojis to add fun! ✨
-- **Structure:** Always structure your answer for clarity, from an exam point-of-view first, then with a simple example. Follow this flow secretly, without using any labels or headings:
-    1.  **Exact Definition (Exam POV):** Start with a precise, textbook-like definition of the term or concept. This should be clear and accurate, perfect for an exam answer. Make key terms **bold**.
-    2.  **Real-Life Example:** Immediately follow up with a simple, relatable, real-life example. Use phrases like "For example..." or "Think of it this way...". This makes the definition easy to understand and remember.
-    3.  **Fun Fact (Optional):** If you can find a cool and relevant fun fact, add it to make things more interesting!
-    4.  **Engaging Follow-Up:** Always end by asking a question to encourage more conversation.
-
-**CRITICAL INSTRUCTIONS:**
-- Do NOT use labels like "Definition:", "Example:", etc. The structure should be invisible to the user.
-- Always provide the definition *before* the example.
-- Keep the language simple and conversational, even in the definition.
-
-**Example Interaction:**
-User: "What is GDP?"
-
-From an exam point of view, **Gross Domestic Product (GDP)** is the total monetary value of all the finished goods and services produced within a country's borders in a specific time period. 📝
-
-Think of it this way: Imagine India is a giant shop. The GDP is the total bill for everything the shop sold in one year—all the cars, software, crops, and even services like doctor's visits. It's the country's economic scorecard!
-
-A cool fact is that services make up the largest part of India's GDP!
-
-Does that help clarify it? We could look at the difference between GDP and GNP next if you're curious!`,
-      },
+      config,
     });
-    for await (const chunk of response) {
-      yield chunk.text;
+
+    let sourcesSent = false;
+    for await (const chunk of stream) {
+      if (chunk.text) {
+        yield { text: chunk.text };
+      }
+
+      const groundingChunks = chunk.candidates?.[0]?.groundingMetadata?.groundingChunks;
+      if (!sourcesSent && groundingChunks && groundingChunks.length > 0) {
+        const sources = groundingChunks
+          .map((c: any) => (c.web ? { uri: c.web.uri, title: c.web.title } : null))
+          .filter((s: any): s is { uri: string; title: string } => s && s.uri && s.title);
+
+        if (sources.length > 0) {
+          yield { sources };
+          sourcesSent = true;
+        }
+      }
     }
   } catch (error) {
-    console.error("Error calling Gemini API in askOrvantaStream:", error);
+    console.error("Error from Gemini API in askOrvantaStream:", error);
     throw new Error("I hit a snag trying to find an answer. Please try again in a moment.");
   }
 };
@@ -115,10 +157,8 @@ Respond ONLY with a single JSON object that matches this structure: { "topics": 
 
 
 export const getExploreTopics = async (): Promise<ExploreTopic[]> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
   try {
-    const response = await ai.models.generateContent({
+    const response = await callGemini({
       model: 'gemini-2.5-flash',
       contents: INDIA_CENTRIC_PROMPT_BASE,
       config: {
@@ -140,10 +180,8 @@ export const getExploreTopics = async (): Promise<ExploreTopic[]> => {
 };
 
 export const getDiscoveryTopics = async (): Promise<ExploreTopic[]> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
   try {
-    const response = await ai.models.generateContent({
+    const response = await callGemini({
       model: 'gemini-2.5-flash',
       contents: INDIA_CENTRIC_PROMPT_BASE, // Using the same India-focused prompt
       config: {
@@ -165,8 +203,6 @@ export const getDiscoveryTopics = async (): Promise<ExploreTopic[]> => {
 };
 
 export const getMarketData = async (): Promise<MarketData> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
   const prompt = `
     Using Google Search to get the most up-to-the-minute market information, provide the latest data for India.
     It is critical that the prices are as accurate as possible. If an exact real-time price isn't available, provide the most recent closing price. Do not invent data.
@@ -185,7 +221,7 @@ export const getMarketData = async (): Promise<MarketData> => {
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await callGemini({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
@@ -227,75 +263,9 @@ export const getMarketData = async (): Promise<MarketData> => {
   }
 };
 
-export const generateFollowUpQuestions = async (interaction: Interaction): Promise<string[]> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-  // Use only the first 1000 chars of the response to keep the prompt concise
-  const conversationContext = `
-    User's query: "${interaction.query}"
-    ${interaction.image ? '(User also provided an image.)' : ''}
-    Your response: "${interaction.response.substring(0, 1000)}..."
-  `;
-
-  const prompt = `
-    You are a creative AI assistant that sparks curiosity. Your goal is to generate 3 follow-up questions based on a conversation snippet. These questions should make the user think, "Wow, I never thought of that!"
-
-    **Instructions:**
-    1.  Generate exactly 3 questions.
-    2.  The questions must be concise, easy to read, and have a similar length to a tweet.
-    3.  Frame them as if the user is asking them.
-    4.  Make them genuinely interesting by using one of these angles:
-        *   **"What if?" scenario:** A hypothetical question that explores possibilities.
-        *   **Connecting Concepts:** A question that links the topic to a different field or a real-world problem.
-        *   **The "Unexpected" Angle:** A question that asks about a surprising fact, a common myth, or a hidden detail.
-
-    **DO NOT ask simple definitional questions like "What is X?" or "Tell me more about Y."** The goal is to provoke deeper, more creative thinking.
-
-    Conversation:
-    ---
-    ${conversationContext}
-    ---
-  `;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            questions: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "An array of exactly 3 interesting follow-up questions."
-            }
-          },
-          required: ["questions"]
-        },
-        thinkingConfig: { thinkingBudget: 0 },
-      }
-    });
-
-    const result = JSON.parse(response.text);
-    if (result.questions && Array.isArray(result.questions)) {
-      return result.questions;
-    }
-    return [];
-  } catch (error) {
-    console.error("Error in generateFollowUpQuestions:", error);
-    // Return empty array on failure so the UI doesn't break
-    return [];
-  }
-};
-
-
 // --- HISTORY AI FUNCTIONS ---
 
 export const summarizeAndTagConversation = async (interactions: Interaction[]): Promise<{ title: string; tags: string[] }> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
   const conversationText = interactions.map(i => `Q: ${i.query}\nA: ${i.response.substring(0, 200)}...`).join('\n\n');
   const prompt = `
     Based on the following conversation, please perform two tasks:
@@ -309,7 +279,7 @@ export const summarizeAndTagConversation = async (interactions: Interaction[]): 
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await callGemini({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
@@ -324,6 +294,7 @@ export const summarizeAndTagConversation = async (interactions: Interaction[]): 
             }
           }
         },
+        thinkingConfig: { thinkingBudget: 0 },
       }
     });
 
@@ -343,7 +314,6 @@ export const findRelevantConversations = async (searchTerm: string, history: Con
     if (!searchTerm.trim()) {
         return history.map(c => c.id);
     }
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const historyForSearch = history.map(c => ({
         id: c.id,
@@ -364,7 +334,7 @@ export const findRelevantConversations = async (searchTerm: string, history: Con
     `;
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await callGemini({
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
@@ -377,7 +347,8 @@ export const findRelevantConversations = async (searchTerm: string, history: Con
                             items: { type: Type.STRING }
                         }
                     }
-                }
+                },
+                thinkingConfig: { thinkingBudget: 0 },
             }
         });
         const result = JSON.parse(response.text);
