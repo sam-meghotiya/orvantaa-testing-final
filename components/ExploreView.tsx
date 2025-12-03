@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { StudyAnalytics, SubjectPerformance, UpcomingTask, Recommendation, TrendingTopic } from '../types.ts';
+import { StudyAnalytics, SubjectPerformance, UpcomingTask, Recommendation, TrendingTopic, Course } from '../types.ts';
 import { UserIcon, ClockIcon, AiSparkleIcon, FlameIcon, BrainCircuitIcon, BookmarkIcon } from './icons/Icons.tsx';
 import { getUser, subscribe } from '../services/userService.ts';
 
@@ -157,6 +157,7 @@ const TrendingTopicsWidget: React.FC = () => (
 
 interface ExploreViewProps {
     onNewChat: () => void;
+    onCourseSelect: (course: Course) => void;
 }
 
 const getGreeting = () => {
@@ -166,7 +167,7 @@ const getGreeting = () => {
     return "Good evening";
 };
 
-export const ExploreView: React.FC<ExploreViewProps> = ({ onNewChat }) => {
+export const ExploreView: React.FC<ExploreViewProps> = ({ onNewChat, onCourseSelect }) => {
     const [user, setUser] = useState(() => getUser());
 
     useEffect(() => {

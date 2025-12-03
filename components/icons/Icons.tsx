@@ -1,16 +1,8 @@
 
-
-
-
-
-
-
-
-
 import React from 'react';
 
-const IconWrapper: React.FC<{ children: React.ReactNode, width?: number, height?: number, className?: string, style?: React.CSSProperties }> = ({ children, width=20, height=20, className, style }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+const IconWrapper: React.FC<{ children: React.ReactNode, width?: number, height?: number, className?: string, style?: React.CSSProperties, strokeWidth?: string | number }> = ({ children, width=20, height=20, className, style, strokeWidth="1.5" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
         {children}
     </svg>
 );
@@ -61,12 +53,12 @@ export const PlusIcon = () => <IconWrapper><line x1="12" y1="5" x2="12" y2="19">
 export const SettingsIcon = () => <IconWrapper><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></IconWrapper>;
 export const BookOpenIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></IconWrapper>;
 export const CompassIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></IconWrapper>;
-export const UserIcon = () => <IconWrapper width={24} height={24}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></IconWrapper>;
+export const UserIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></IconWrapper>;
 export const WomanIcon: React.FC<IconProps> = ({ className, style }) => <IconWrapper width={24} height={24} className={className} style={style}><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 00-16 0"/></IconWrapper>;
 export const LockIcon = () => <IconWrapper><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></IconWrapper>;
 export const HomeIcon = () => <IconWrapper width={24} height={24}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path><path d="M9 22V12h6v10"></path></IconWrapper>;
 export const QuizzesIcon = () => <IconWrapper width={24} height={24}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="m9 14 2 2 4-4"></path></IconWrapper>;
-export const SubjectsIcon = () => <IconWrapper width={24} height={24}><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect></IconWrapper>;
+export const SubjectsIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect></IconWrapper>;
 export const ProfileIcon = UserIcon;
 export const CheckCircleIcon = () => <IconWrapper><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconWrapper>;
 export const XCircleIcon = () => <IconWrapper><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></IconWrapper>;
@@ -129,6 +121,14 @@ export const ListBulletIcon = () => (
     </svg>
 );
 
+// --- Subject Specific Icons ---
+export const AtomIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><circle cx="12" cy="12" r="2"></circle><path d="M4.93 19.07a10 10 0 1 1 14.14 0"></path><path d="M4.93 4.93a10 10 0 1 0 14.14 14.14"></path><path d="M19.07 4.93a10 10 0 0 0-14.14 0"></path></IconWrapper>;
+export const BeakerIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="M4.5 3h15"></path><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"></path><path d="M6 14h12"></path></IconWrapper>;
+export const DnaIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="M2 15c6.667-6 13.333 0 20-6"></path><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"></path><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"></path><path d="M17 17c-1.798 1.998-2.518 3.995-2.807 5.993"></path><path d="M7 7c1.798-1.998 2.518-3.995 2.807-5.993"></path></IconWrapper>;
+export const CalculatorIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M16 10h.01"></path><path d="M12 10h.01"></path><path d="M8 10h.01"></path><path d="M12 14h.01"></path><path d="M8 14h.01"></path><path d="M12 18h.01"></path><path d="M8 18h.01"></path></IconWrapper>;
+export const PaletteIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></IconWrapper>;
+export const BankIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="M3 21h18"></path><path d="M5 21v-7"></path><path d="M19 21v-7"></path><path d="M10 9L3 21"></path><path d="M14 9l7 12"></path><rect x="3" y="4" width="18" height="5"></rect><path d="M12 2v2"></path></IconWrapper>;
+export const TranslationIcon: React.FC<CategoryIconProps> = ({ width = 24, height = 24 }) => <IconWrapper width={width} height={height}><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></IconWrapper>;
 
 // Fallback Category Icons
 export const KnowledgeIcon: React.FC<CategoryIconProps> = ({ width = 48, height = 48 }) => <IconWrapper width={width} height={height}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></IconWrapper>;
@@ -141,9 +141,28 @@ export const BusinessIcon: React.FC<CategoryIconProps> = ({ width = 48, height =
 export const PhilosophyIcon: React.FC<CategoryIconProps> = ({ width = 48, height = 48 }) => <IconWrapper width={width} height={height}><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></IconWrapper>;
 
 // --- Filled Icons for Nav Bar ---
-export const HomeIconFilled = () => <FilledIconWrapper width={24} height={24}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M9 22V12h6v10"/></FilledIconWrapper>;
-export const QuizzesIconFilled = () => <FilledIconWrapper width={24} height={24}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/></FilledIconWrapper>;
+export const HomeIconFilled = () => (
+  <FilledIconWrapper width={24} height={24}>
+    <path fillRule="evenodd" clipRule="evenodd" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z M9 22V12h6v10Z" />
+  </FilledIconWrapper>
+);
+
+export const QuizzesIconFilled = () => (
+  <FilledIconWrapper width={24} height={24}>
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    <path d="m9 14 2 2 4-4" fill="none" stroke="var(--bg-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </FilledIconWrapper>
+);
+
 export const SubjectsIconFilled = () => <FilledIconWrapper width={24} height={24}><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></FilledIconWrapper>;
+
 export const UserIconFilled = () => <FilledIconWrapper width={24} height={24}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></FilledIconWrapper>;
-export const OracleIconFilled = () => <FilledIconWrapper width={24} height={24}><path d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,15a5,5,0,1,1,5-5A5,5,0,0,1,12,17Z"/></FilledIconWrapper>;
+
+export const OracleIconFilled = () => (
+    <FilledIconWrapper width={24} height={24}>
+        <path fillRule="evenodd" clipRule="evenodd" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" />
+    </FilledIconWrapper>
+);
+
 export const ProfileIconFilled = UserIconFilled;

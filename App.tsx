@@ -10,6 +10,7 @@ import { Onboarding } from './components/Onboarding.tsx';
 import { QuizzesView } from './components/QuizzesView.tsx';
 import { LiveConversationView } from './components/LiveConversationView.tsx';
 import { ProfileView } from './components/ProfileView.tsx';
+import { SubjectsView } from './components/SubjectsView.tsx';
 import { UserIcon, AiSparkleIcon, HomeIcon, SubjectsIcon, OracleIcon, QuizzesIcon, ProfileIcon, MenuIcon, CloseIcon, TrashIcon, HistoryIcon, ChevronLeftIcon, HomeIconFilled, SubjectsIconFilled, OracleIconFilled, QuizzesIconFilled, ProfileIconFilled } from './components/icons/Icons.tsx';
 
 import { askOrvantaStream, summarizeAndTagConversation, findRelevantConversations } from './services/geminiService.ts';
@@ -77,28 +78,31 @@ const NavButton: React.FC<{
                 onClick();
             }}
             aria-label={label}
-            className="group relative flex items-center justify-center w-16 h-full text-black transition-transform duration-150 ease-out active:scale-90"
+            className="group relative flex flex-1 items-center justify-center h-full outline-none focus:outline-none"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            {/* Outline icon - visible when not active. Crossfades with filled icon. */}
-            <div
-                aria-hidden="true"
-                className={`
-                    absolute transition-opacity duration-300 ease-in-out
-                    ${isActive ? 'opacity-0' : 'opacity-70 group-hover:opacity-100'}
-                `}
-            >
-                {icon}
-            </div>
+            <div className="relative w-6 h-6">
+                {/* Outline icon - visible when not active. Fades out and scales down when active. */}
+                <div
+                    aria-hidden="true"
+                    className={`
+                        absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                        ${isActive ? 'opacity-0 scale-90' : 'opacity-50 scale-100'}
+                    `}
+                >
+                    {icon}
+                </div>
 
-            {/* Filled icon - visible when active. Crossfades with outline icon. */}
-            <div
-                aria-hidden="true"
-                className={`
-                    absolute transition-opacity duration-300 ease-in-out
-                    ${isActive ? 'opacity-100' : 'opacity-0'}
-                `}
-            >
-                {activeIcon}
+                {/* Filled icon - visible when active. Fades in and scales up when active. */}
+                <div
+                    aria-hidden="true"
+                    className={`
+                        absolute inset-0 flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                        ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
+                    `}
+                >
+                    {activeIcon}
+                </div>
             </div>
         </button>
     );
@@ -347,6 +351,14 @@ const App: React.FC = () => {
         }));
     };
     
+    // Handle subject selection from SubjectsView
+    const handleSubjectSelect = (subjectName: string) => {
+        handleChatNavClick();
+        // Optionally, we can auto-start the chat with a context prompt
+        const prompt = `Help me study ${subjectName}. What are some key topics I should focus on?`;
+        handleSearch(prompt);
+    };
+
     const renderChatView = () => {
         return isLiveMode ? (
             <LiveConversationView 
@@ -354,15 +366,15 @@ const App: React.FC = () => {
                 onComplete={handleLiveConversationComplete}
             />
         ) : (
-        <div className="h-full w-full flex flex-col bg-white text-black">
-             <header className="fixed top-0 left-0 right-0 z-30 px-4 py-3 flex justify-between items-center bg-white/80 backdrop-blur-sm border-b border-gray-200">
-                <button onClick={() => handleSetView('explore')} className="flex items-center gap-1 text-gray-800 font-semibold text-lg">
+        <div className="h-full w-full flex flex-col bg-black text-white">
+             <header className="fixed top-0 left-0 right-0 z-30 px-4 py-3 flex justify-between items-center bg-black/85 backdrop-blur-xl border-b border-white/10">
+                <button onClick={() => handleSetView('explore')} className="flex items-center gap-1 text-white font-medium text-lg opacity-90 hover:opacity-100 transition-opacity">
                     <ChevronLeftIcon />
-                    <span>Home</span>
+                    <span>Back</span>
                 </button>
 
                 <button 
-                    className="p-2 rounded-full text-gray-800 hover:bg-gray-200"
+                    className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
                     aria-label="Menu"
                 >
                     <MenuIcon />
@@ -373,7 +385,7 @@ const App: React.FC = () => {
                 <div className="flex flex-col gap-4">
                     {/* Static Welcome Message */}
                     <div className="flex justify-start w-full animate-fade-in">
-                        <div className="bg-gray-100 rounded-2xl rounded-bl-lg py-3 px-4 max-w-lg text-gray-800">
+                        <div className="bg-[#1C1C1E] border border-white/5 rounded-2xl rounded-bl-lg py-3 px-4 max-w-lg text-gray-100 shadow-sm">
                            <p>Hello! 👋 How can I help you study today? 🧠</p>
                         </div>
                     </div>
@@ -386,7 +398,7 @@ const App: React.FC = () => {
                                 {/* User question bubble */}
                                 {(interaction.query || interaction.image) && (
                                     <div className="flex justify-end w-full">
-                                        <div className="bg-black rounded-2xl py-3 px-4 max-w-lg text-white">
+                                        <div className="bg-[#2C2C2E] rounded-2xl py-3 px-4 max-w-lg text-white border border-white/5">
                                             {interaction.image && (
                                                 <img src={interaction.image} alt="User upload" className="mb-2 rounded-lg max-w-xs max-h-48 object-cover" />
                                             )}
@@ -400,7 +412,7 @@ const App: React.FC = () => {
                                 {/* AI response text with typewriter effect */}
                                 {(interaction.response || (isLastInteraction && interaction.isLoading)) ? (
                                     <div className="flex justify-start w-full">
-                                        <div className="bg-gray-100 rounded-2xl rounded-bl-lg py-3 px-4 max-w-lg text-gray-800 prose prose-p:my-0 prose-strong:text-black">
+                                        <div className="bg-transparent rounded-2xl rounded-bl-lg py-1 px-4 max-w-lg text-gray-100 prose prose-invert prose-p:my-1 prose-strong:text-white">
                                             {isLastInteraction && interaction.isLoading ? (
                                                 <Typewriter text={interaction.response} />
                                             ) : (
@@ -416,23 +428,25 @@ const App: React.FC = () => {
                 </div>
             </main>
 
-            <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center p-4 bg-gradient-to-t from-white via-white to-transparent">
-                <SearchBar 
-                    onSearch={handleSearch}
-                    query={query}
-                    setQuery={setQuery}
-                    isLoading={isLoading}
-                    selectedImage={selectedImage}
-                    onImageSelect={handleImageSelect}
-                    onRemoveImage={handleRemoveImage}
-                    onCameraClick={handleCameraClick}
-                    isListening={isListening}
-                    startListening={startListening}
-                    stopListening={stopListening}
-                    hasRecognitionSupport={hasRecognitionSupport}
-                    useWebSearch={useWebSearch}
-                    onWebSearchChange={setUseWebSearch}
-                />
+            <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center p-4 bg-gradient-to-t from-black via-black to-transparent pointer-events-none">
+                <div className="pointer-events-auto w-full max-w-lg lg:max-w-2xl">
+                    <SearchBar 
+                        onSearch={handleSearch}
+                        query={query}
+                        setQuery={setQuery}
+                        isLoading={isLoading}
+                        selectedImage={selectedImage}
+                        onImageSelect={handleImageSelect}
+                        onRemoveImage={handleRemoveImage}
+                        onCameraClick={handleCameraClick}
+                        isListening={isListening}
+                        startListening={startListening}
+                        stopListening={stopListening}
+                        hasRecognitionSupport={hasRecognitionSupport}
+                        useWebSearch={useWebSearch}
+                        onWebSearchChange={setUseWebSearch}
+                    />
+                </div>
             </div>
         </div>
     )};
@@ -455,7 +469,7 @@ const App: React.FC = () => {
             case 'quizzes':
                 return <QuizzesView />;
             case 'subjects':
-                return <PlaceholderView title="Subjects" description="Dive deep into curated topics and learning paths." icon={<SubjectsIcon width={48} height={48} />} />;
+                return <SubjectsView onSubjectSelect={handleSubjectSelect} />;
             case 'profile':
                 return <ProfileView />;
             case 'chat':
@@ -480,15 +494,15 @@ const App: React.FC = () => {
     ];
 
     return (
-        <div className={`min-h-screen w-full flex flex-col transition-colors duration-300 ${view === 'chat' ? 'bg-white' : 'bg-[var(--bg-main)]'}`}>
+        <div className="min-h-screen w-full flex flex-col bg-[var(--bg-main)] text-[var(--text-main)] overflow-x-hidden">
             <div className={`flex-grow ${view !== 'chat' ? 'pb-24' : ''}`}>
                 {renderMainContent()}
             </div>
             
             { !selectedCourse && !isLiveMode && view !== 'chat' && (
                 <>
-                    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border-t border-white/10" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-                        <div className="flex justify-around items-center h-[60px] text-white">
+                    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#000000]/85 backdrop-blur-2xl border-t border-white/10 shadow-[0_-1px_5px_rgba(0,0,0,0.5)]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                        <div className="flex w-full items-center h-[60px] px-2">
                             {navItems.map(item => (
                                 <NavButton
                                     key={item.id}
